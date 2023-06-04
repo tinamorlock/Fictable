@@ -11,17 +11,16 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schemas.Post])
-def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user), limit: int = 10):
     
     # This only shows logged in user's posts
     # posts = db.query(models.Post).filter(models.Post.owner_id == current_user.id).all()
-
-    posts = db.query(models.Post).filter(models.Post.owner_id == current_user.id).all()
+    print(limit)
+    posts = db.query(models.Post).limit(limit).all()
     return posts
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-    print(current_user)
     new_post = models.Post(owner_id = current_user.id, **post.dict())
     db.add(new_post)
     db.commit()
